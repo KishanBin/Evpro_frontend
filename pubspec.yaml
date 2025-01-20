@@ -45,6 +45,7 @@ dependencies:
   geolocator: ^12.0.0
   flutter_osm_plugin: ^0.70.4
   image_picker: ^1.1.2
+  shared_preferences: ^2.2.3
 
 
 dev_dependencies:

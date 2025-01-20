@@ -7,6 +7,7 @@ import 'package:ev_pro/home.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -96,14 +97,16 @@ class _LoginPageState extends State<LoginPage> {
                     print(data);
 
                     try {
-                      final response = await http.post(Uri.parse(url),
-                          // headers: {'Content-Type': 'application/json'},
-                          body: data);
+                      final response =
+                          await http.post(Uri.parse(url), body: data);
 
                       if (response.statusCode == 200) {
                         final responseData = jsonDecode(response.body);
                         print(responseData);
                         if (responseData['status'] == true) {
+                          SharedPreferences prefs =
+                              await SharedPreferences.getInstance();
+                          prefs.setString('token', responseData['token']);
                           final snackBar = SnackBar(
                             elevation: 100,
                             content: Text(responseData['message']),
