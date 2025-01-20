@@ -1,5 +1,6 @@
 import 'package:ev_pro/Authentication/Login.dart';
 import 'package:ev_pro/Authentication/register.dart';
+import 'package:ev_pro/home.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -18,7 +19,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: LoginPage(),
+      home: Dashboard(),
     );
   }
 }
