@@ -1,4 +1,5 @@
 import 'package:ev_pro/Screens/Editprofile.dart';
+import 'package:ev_pro/Screens/addStation.dart';
 import 'package:ev_pro/Screens/station_finder.dart';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
@@ -76,11 +77,9 @@ class _DashboardState extends State<Dashboard> {
 
   final List<Map<String, dynamic>> iconButtons = [
     {
-      'icon': Icons.settings,
-      'label': 'Maintanace',
-      'onPressed': () {
-        print('Maintanace');
-      },
+      'icon': Icons.ev_station_outlined,
+      'label': 'Add Station',
+      'onPressed': add_Station(),
     },
     {
       'icon': Icons.location_on_outlined,

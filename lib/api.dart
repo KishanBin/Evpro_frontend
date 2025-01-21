@@ -1,7 +1,7 @@
 class Api {
   // Base URL for the API
   final String baseUrl =
-      "https://0982-2409-40c0-26-1a3-3048-472c-2dee-9800.ngrok-free.app";
+      "https://918f-2409-40c0-1025-7994-8516-fa7d-5bef-eeb1.ngrok-free.app";
 
   // Endpoint for customer registration
   String get user => "$baseUrl/api/";
