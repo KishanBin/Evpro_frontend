@@ -149,14 +149,14 @@ class _add_StationState extends State<add_Station> {
                     final String url = "${Api().user}add_station";
 
                     final Map<String, dynamic> data = {
-                      'station_name': name,
+                      'name': name,
                       'location': location,
                       'latitude': latitudeController!.text,
                       'longitude': longitudeController!.text,
                       'charging_type': chargingType,
-                      'number_of_ports': numberOfPorts,
+                      'number_of_ports': numberOfPorts.toString(),
                       'operating_hours': operatingHours,
-                      'price_per_kwh': pricePerKwh,
+                      'price_per_kwh': pricePerKwh.toString(),
                     };
 
                     print(url);
@@ -194,15 +194,6 @@ class _add_StationState extends State<add_Station> {
                       print("Error: $e");
                     }
                     // Process the data here
-                    print('Name: $name');
-                    print('Location: $location');
-                    print('Latitude: ${latitudeController.toString()}');
-                    print('Longitude: ${longitudeController.toString()}');
-                    print('Charging Type: $chargingType');
-                    print('Number of Ports: $numberOfPorts');
-
-                    print('Operating Hours: $operatingHours');
-                    print('Price Per kWh: $pricePerKwh');
                   }
                 },
                 child: Text('Submit'),
