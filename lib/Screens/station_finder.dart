@@ -1,5 +1,5 @@
 import 'dart:math';
-
+import 'package:ev_pro/Screens/ev.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -19,21 +19,34 @@ class _station_finderState extends State<station_finder> {
   late MapController _mapController;
   loc.LocationData? currentLocation;
   loc.Location _locationService = loc.Location();
+  String? _latitude;
+  String? _longitude;
+  LatLng? self;
+
+  List<Marker> stationMarker = [];
 
   Future<void> fetchCurrentLocation() async {
     try {
       currentLocation = await _locationService.getLocation();
-      setState(() {
-        if (currentLocation != null) {
-          _mapController.move(
-            LatLng(currentLocation!.latitude!, currentLocation!.longitude!),
-            13.0,
-          );
 
-          _mumbai =
-              LatLng(currentLocation!.latitude!, currentLocation!.longitude!);
-        }
-      });
+      if (currentLocation != null) {
+        self = LatLng(currentLocation!.latitude!, currentLocation!.longitude!);
+        _latitude = currentLocation!.latitude!.toString();
+        _longitude = currentLocation!.longitude!.toString();
+
+        var myLocation = Marker(
+            point: self!,
+            child: const Icon(
+              Icons.location_pin,
+              color: Colors.blue,
+              size: 40,
+            ));
+        stationMarker.add(myLocation);
+        var _stations = await Ev().getStation(_latitude, _longitude);
+        stationMarker.addAll(_stations);
+      }
+      setState(() {});
+      _mapController.move(self!, 13.0);
     } catch (e) {
       print('Could not fetch location: $e');
     }
@@ -43,6 +56,7 @@ class _station_finderState extends State<station_finder> {
   void initState() {
     super.initState();
     _mapController = MapController();
+    fetchCurrentLocation();
   }
 
   @override
@@ -56,44 +70,17 @@ class _station_finderState extends State<station_finder> {
   }
 
   Widget _map() {
-    return Stack(
-      children: [
-        FlutterMap(
-            mapController: _mapController,
-            options: MapOptions(
-              initialCenter: _mumbai,
-              initialZoom: 13,
-            ),
-            children: [
-              TileLayer(
-                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'dev.fleaflet.flutter_map.example'),
-              MarkerLayer(markers: [
-                Marker(
-                  point: _mumbai,
-                  child: Icon(
-                    Icons.location_pin,
-                    color: Colors.red,
-                    size: 40,
-                  ),
-                ),
-              ]),
-            ]),
-        Positioned(
-            top: 560,
-            left: 280,
-            child: Container(
-              decoration: BoxDecoration(
-                  color: Colors.greenAccent,
-                  borderRadius: BorderRadius.circular(50)),
-              height: 60,
-              width: 60,
-              child: IconButton(
-                icon: Icon(Icons.add),
-                onPressed: () => fetchCurrentLocation(),
-              ),
-            )),
-      ],
-    );
+    return FlutterMap(
+        mapController: _mapController,
+        options: MapOptions(
+          initialCenter: _mumbai,
+          initialZoom: 13.0,
+        ),
+        children: [
+          TileLayer(
+              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+              userAgentPackageName: 'dev.fleaflet.flutter_map.example'),
+          MarkerLayer(markers: stationMarker),
+        ]);
   }
 }
