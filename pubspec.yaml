@@ -46,6 +46,8 @@ dependencies:
   flutter_osm_plugin: ^0.70.4
   image_picker: ^1.1.2
   shared_preferences: ^2.2.3
+  flutter_map_marker_popup: ^7.0.0
+  collection: ^1.18.0
 
 
 dev_dependencies:
