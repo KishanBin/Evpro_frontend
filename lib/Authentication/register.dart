@@ -37,7 +37,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
           "Registration",
           style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.greenAccent,
       ),
       body: SingleChildScrollView(
         child: Padding(

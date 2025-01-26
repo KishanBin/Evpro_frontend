@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:ev_pro/api.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +19,7 @@ class Ev {
     try {
       final response = await http.get(Uri.parse(url));
       final responseData = jsonDecode(response.body);
-      // print("mapData: $responseData");
+      print("mapData: $responseData");
       if (response.statusCode == 200) {
         List x = responseData;
         for (int i = 0; i < x.length; i++) {
@@ -34,7 +35,17 @@ class Ev {
                 size: 40,
               ));
 
-          var customMarker = CustomMarker(marker: stations, name: y['name']);
+          var customMarker = CustomMarker(
+              marker: stations,
+              name: y['name'],
+              id: y['id'],
+              location: y['location'],
+              chargingType: y['charging_type'],
+              number_of_ports: y['number_of_ports'],
+              availability_status: y['availability_status'],
+              operation_hr: y['operating_hours'],
+              Price: y['price_per_kwh'],
+              distance: y['distance']);
           stationList.add(customMarker);
         }
       }
@@ -48,9 +59,24 @@ class Ev {
 class CustomMarker {
   final Marker marker;
   final String name; // Example additional data field
+  String? location;
+  String? chargingType;
+  int? number_of_ports;
+  String? operation_hr;
+  String? availability_status;
+  String? Price;
+  int? id;
+  int? distance;
 
-  CustomMarker({
-    required this.marker,
-    required this.name,
-  });
+  CustomMarker(
+      {required this.marker,
+      required this.name,
+      this.id,
+      this.location,
+      this.chargingType,
+      this.number_of_ports,
+      this.operation_hr,
+      this.availability_status,
+      this.Price,
+      this.distance});
 }

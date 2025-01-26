@@ -30,7 +30,7 @@ class _LoginPageState extends State<LoginPage> {
           "Login",
           style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.greenAccent,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

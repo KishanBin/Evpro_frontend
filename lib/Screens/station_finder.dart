@@ -1,3 +1,4 @@
+import 'package:ev_pro/Screens/booking.dart';
 import 'package:ev_pro/Screens/ev.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -70,7 +71,8 @@ class _station_finderState extends State<station_finder> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Google Maps Demo'),
+          title: Text('Station Finder'),
+          centerTitle: true,
           backgroundColor: Colors.greenAccent,
         ),
         body: _map(context, stationMarker));
@@ -104,14 +106,80 @@ class _station_finderState extends State<station_finder> {
                       if (customMarker != null) {
                         return Card(
                           child: Container(
-                            padding: EdgeInsets.all(8),
-                            height: 100,
-                            width: 200,
+                            padding: EdgeInsets.fromLTRB(8, 8, 8, 0),
+                            height: 200,
                             decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(10)),
                             child: Column(
-                              children: [Text('Name: ${customMarker.name}')],
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.all(5),
+                                  decoration: BoxDecoration(
+                                      color: customMarker.availability_status ==
+                                              "true"
+                                          ? Colors.greenAccent
+                                          : Colors.redAccent,
+                                      borderRadius: BorderRadius.circular(5)),
+                                  child: Text(
+                                    customMarker.availability_status == "true"
+                                        ? 'Available'
+                                        : 'Not available',
+                                  ),
+                                ),
+                                Text.rich(
+                                  TextSpan(
+                                    children: [
+                                      const TextSpan(
+                                        text: 'Name: ',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      TextSpan(
+                                        text: '${customMarker.name}\n',
+                                      ),
+                                      const TextSpan(
+                                        text: 'Distance: ',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      TextSpan(
+                                        text: '${customMarker.distance} km\n',
+                                      ),
+                                      const TextSpan(
+                                        text: 'Type: ',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      TextSpan(
+                                        text: '${customMarker.chargingType}\n',
+                                      ),
+                                      const TextSpan(
+                                        text: 'Price: ',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      TextSpan(
+                                        text: '${customMarker.Price}\n',
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  station_booking(
+                                                      station_id:
+                                                          customMarker.id!)));
+                                    },
+                                    child: Text('Book'))
+                              ],
                             ),
                           ),
                         );
