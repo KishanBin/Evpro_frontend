@@ -54,6 +54,11 @@ class Ev {
     }
     return stationList;
   }
+  
+  void getAvailableports(){
+    
+  }
+
 }
 
 class CustomMarker {

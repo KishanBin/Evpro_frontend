@@ -163,22 +163,25 @@ class _station_finderState extends State<station_finder> {
                                             fontWeight: FontWeight.bold),
                                       ),
                                       TextSpan(
-                                        text: '${customMarker.Price}\n',
+                                        text: '${customMarker.Price} /Kwh \n',
                                       ),
                                     ],
                                   ),
                                 ),
-                                ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  station_booking(
-                                                      station_id:
-                                                          customMarker.id!)));
-                                    },
-                                    child: Text('Book'))
+                                customMarker.availability_status == "true"
+                                    ? ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      station_booking(
+                                                          stationId:
+                                                              customMarker
+                                                                  .id!)));
+                                        },
+                                        child: Text('Book'))
+                                    : SizedBox(),
                               ],
                             ),
                           ),
