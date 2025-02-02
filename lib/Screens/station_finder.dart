@@ -1,4 +1,4 @@
-import 'package:ev_pro/Screens/booking.dart';
+import 'package:ev_pro/Screens/timeSlot.dart';
 import 'package:ev_pro/Screens/ev.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -107,7 +107,7 @@ class _station_finderState extends State<station_finder> {
                         return Card(
                           child: Container(
                             padding: EdgeInsets.fromLTRB(8, 8, 8, 0),
-                            height: 200,
+                            height: 170,
                             decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(10)),
@@ -115,21 +115,21 @@ class _station_finderState extends State<station_finder> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisSize: MainAxisSize.min,
                               mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.all(5),
-                                  decoration: BoxDecoration(
-                                      color: customMarker.availability_status ==
-                                              "true"
-                                          ? Colors.greenAccent
-                                          : Colors.redAccent,
-                                      borderRadius: BorderRadius.circular(5)),
-                                  child: Text(
-                                    customMarker.availability_status == "true"
-                                        ? 'Available'
-                                        : 'Not available',
-                                  ),
-                                ),
+                              children: <Widget>[
+                                // Container(
+                                //   padding: EdgeInsets.all(5),
+                                //   decoration: BoxDecoration(
+                                //       color: customMarker.availability_status ==
+                                //               "true"
+                                //           ? Colors.greenAccent
+                                //           : Colors.redAccent,
+                                //       borderRadius: BorderRadius.circular(5)),
+                                //   child: Text(
+                                //     customMarker.availability_status == "true"
+                                //         ? 'Available'
+                                //         : 'Not available',
+                                //   ),
+                                // ),
                                 Text.rich(
                                   TextSpan(
                                     children: [
@@ -168,20 +168,17 @@ class _station_finderState extends State<station_finder> {
                                     ],
                                   ),
                                 ),
-                                customMarker.availability_status == "true"
-                                    ? ElevatedButton(
-                                        onPressed: () {
-                                          Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      station_booking(
-                                                          stationId:
-                                                              customMarker
-                                                                  .id!)));
-                                        },
-                                        child: Text('Book'))
-                                    : SizedBox(),
+                                ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  station_booking(
+                                                      stationId:
+                                                          customMarker.id!)));
+                                    },
+                                    child: Text('Book')),
                               ],
                             ),
                           ),

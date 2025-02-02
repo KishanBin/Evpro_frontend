@@ -96,13 +96,12 @@ class _LoginPageState extends State<LoginPage> {
                     print(url);
                     print(data);
 
+                    final response =
+                        await http.post(Uri.parse(url), body: data);
+                    final responseData = jsonDecode(response.body);
+                    print(responseData);
                     try {
-                      final response =
-                          await http.post(Uri.parse(url), body: data);
-
                       if (response.statusCode == 200) {
-                        final responseData = jsonDecode(response.body);
-                        print(responseData);
                         if (responseData['status'] == true) {
                           SharedPreferences prefs =
                               await SharedPreferences.getInstance();
@@ -110,7 +109,7 @@ class _LoginPageState extends State<LoginPage> {
                           final snackBar = SnackBar(
                             elevation: 100,
                             content: Text(responseData['message']),
-                            backgroundColor: Colors.green,
+                            backgroundColor: Colors.greenAccent,
                           );
                           ScaffoldMessenger.of(context).showSnackBar(snackBar);
                           Navigator.pushReplacement(context,

@@ -1,10 +1,12 @@
 import 'dart:convert';
 
+import 'package:ev_pro/Screens/chargingPorts.dart';
 import 'package:ev_pro/api.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 class station_booking extends StatefulWidget {
   final int stationId;
@@ -17,23 +19,24 @@ class station_booking extends StatefulWidget {
 
 class _StationBookingState extends State<station_booking> {
   Map<String, dynamic>? stationData;
-  List<dynamic> portsList = [];
-  int? selectedPort;
+  List<dynamic> slotsList = [];
   String? chargingType;
-  int? timerCount;
+  DateTime _selectedDate = DateTime.now();
 
-  Future<void> fetchPorts() async {
-    final String url = "${Api().user}getStationPorts?id=${widget.stationId}";
+  Future<void> fetchTimeSlots() async {
+    // print(widget.stationId);
+    final String url =
+        "${Api().user}fetchTimeSlot?station_id=${widget.stationId}";
 
     print(url);
-
+    final response = await http.get(Uri.parse(url));
+    final responseData = jsonDecode(response.body);
+    // print(responseData);
     try {
-      final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
         setState(() {
           stationData = responseData['station'];
-          portsList = responseData['ports'];
+          slotsList = responseData['slots'];
           chargingType = responseData['station']['charging_type'];
         });
       }
@@ -42,50 +45,17 @@ class _StationBookingState extends State<station_booking> {
     }
   }
 
-  void selectPort(int portNumber) {
-    setState(() {
-      if (selectedPort == portNumber) {
-        selectedPort = null;
-        timerCount = null;
-      } else {
-        selectedPort = portNumber;
-        if (chargingType == 'Level 2') {
-          timerCount = 60; // 1 hour for level 2
-        } else if (chargingType == 'Level 3') {
-          timerCount = 20; // 20 minutes for level 3
-        }
-      }
-    });
-  }
-
-  void incrementTime() {
-    setState(() {
-      if (timerCount != null) {
-        timerCount = timerCount! + (chargingType == 'Level 2' ? 20 : 60);
-      }
-    });
-  }
-
-  void decrementTime() {
-    setState(() {
-      if (timerCount != null && timerCount! > 0) {
-        timerCount = timerCount! - (chargingType == 'Level 2' ? 20 : 60);
-        if (timerCount! < 0) timerCount = 0;
-      }
-    });
-  }
-
   @override
   void initState() {
     super.initState();
-    fetchPorts();
+    fetchTimeSlots();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Book Port'),
+        title: Text('Time Slots'),
         centerTitle: true,
         backgroundColor: Colors.greenAccent,
       ),
@@ -146,7 +116,7 @@ class _StationBookingState extends State<station_booking> {
                         SizedBox(height: 8),
                         Row(
                           children: [
-                            Icon(Icons.electrical_services,
+                            const Icon(Icons.electrical_services,
                                 color: Colors.greenAccent),
                             SizedBox(width: 8),
                             Text(
@@ -185,8 +155,58 @@ class _StationBookingState extends State<station_booking> {
                   ),
 
             // Add more UI elements or functionalities as needed
-            SizedBox(height: 16),
-            if (portsList.isNotEmpty)
+            SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                InkWell(
+                  onTap: () {
+                    _selectDate(context);
+                  },
+                  child: Container(
+                    padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                    decoration: BoxDecoration(
+                      color: Colors.greenAccent,
+                      borderRadius: BorderRadius.circular(5),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 3,
+                          blurRadius: 7,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Icon(
+                          Icons.calendar_today,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(
+                          width: 5,
+                        ),
+                        Text(
+                          '${DateFormat('MM/dd/yyyy').format(_selectedDate)}',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Icon(
+                          Icons.arrow_drop_down,
+                          color: Colors.white,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 10),
+            if (slotsList.isNotEmpty)
               Expanded(
                 child: GridView.builder(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -194,16 +214,25 @@ class _StationBookingState extends State<station_booking> {
                     crossAxisSpacing: 8,
                     mainAxisSpacing: 8,
                   ),
-                  itemCount: portsList.length,
+                  itemCount: slotsList.length,
                   itemBuilder: (context, index) {
-                    final port = portsList[index];
+                    final slot = slotsList[index]; // Changed from port to slot
                     return GestureDetector(
-                      onTap: () => selectPort(port['port_number']),
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ChargingPorts(
+                                  stationId: widget.stationId,
+                                  date: _selectedDate,
+                                  start_time: slot['start_time'],
+                                  end_time: slot['end_time']),
+                            ));
+                      }, // Changed from port_number to slot_number
                       child: Container(
+                        padding: EdgeInsets.all(2),
                         decoration: BoxDecoration(
-                          color: selectedPort == port['port_number']
-                              ? Colors.greenAccent
-                              : Colors.white,
+                          color: Colors.white,
                           border:
                               Border.all(color: Colors.greenAccent, width: 2),
                           borderRadius: BorderRadius.circular(8),
@@ -218,12 +247,13 @@ class _StationBookingState extends State<station_booking> {
                         ),
                         child: Center(
                           child: Text(
-                            'Port ${port['port_number']}',
-                            style: TextStyle(
+                            '${slot['start_time']} - ${slot['end_time']}', // Changed from Port to Slot
+                            style: const TextStyle(
                               color: Colors.black,
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                              fontSize: 12,
                             ),
+                            textAlign: TextAlign.center,
                           ),
                         ),
                       ),
@@ -234,38 +264,19 @@ class _StationBookingState extends State<station_booking> {
           ],
         ),
       ),
-      bottomNavigationBar: timerCount != null && timerCount! > 9
-          ? BottomAppBar(
-              color: Colors.greenAccent,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.remove, color: Colors.white),
-                    onPressed: decrementTime,
-                  ),
-                  Text(
-                    'Time: $timerCount ${chargingType == 'Level 2' ? 'minutes' : 'minutes'}',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.add, color: Colors.white),
-                    onPressed: incrementTime,
-                  ),
-                  ElevatedButton(
-                      onPressed: () {
-                        print(selectedPort);
-                        print(timerCount);
-                      },
-                      child: Text('Book'))
-                ],
-              ),
-            )
-          : null,
     );
+  }
+
+  _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && picked != _selectedDate)
+      setState(() {
+        _selectedDate = picked;
+      });
   }
 }

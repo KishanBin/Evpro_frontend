@@ -37,7 +37,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
           "Registration",
           style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: Colors.greenAccent,
+        backgroundColor: Colors.green,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -169,7 +169,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                           final snackBar = SnackBar(
                             elevation: 100,
                             content: Text(responseData['message']),
-                            backgroundColor: Colors.green,
+                            backgroundColor: Colors.greenAccent,
                           );
                           ScaffoldMessenger.of(context).showSnackBar(snackBar);
                           Navigator.push(context,
