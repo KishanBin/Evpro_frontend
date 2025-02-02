@@ -37,7 +37,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
           "Registration",
           style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.greenAccent,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -148,7 +148,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     final String url = "${Api().user}regi_user";
 
                     final Map<String, dynamic> data = {
-                      'user_type': _userType,
+                      'userType': _userType,
                       'name': _name,
                       'email': _email.text,
                       'password': _password

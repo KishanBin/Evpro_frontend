@@ -1,6 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
+import 'package:ev_pro/api.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileUpdatePage extends StatefulWidget {
   @override
@@ -9,9 +14,11 @@ class ProfileUpdatePage extends StatefulWidget {
 
 class _ProfileUpdatePageState extends State<ProfileUpdatePage> {
   final _formKey = GlobalKey<FormState>();
-  String _name = '';
-  String _email = '';
+  String user_id = '';
+  TextEditingController _nameController = TextEditingController();
+  TextEditingController _emailController = TextEditingController();
   File? _image;
+  String? pImage;
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -24,19 +31,66 @@ class _ProfileUpdatePageState extends State<ProfileUpdatePage> {
     }
   }
 
-  void _updateProfile() {
+  Future<void> _updateProfile() async {
     if (_formKey.currentState!.validate()) {
-      // Here you can handle the profile update logic, e.g., send data to your backend
-      print('Name: $_name');
-      print('Email: $_email');
+      final uri = Uri.parse("${Api().user}profileUpdate");
+      print(uri);
+      var request = http.MultipartRequest('POST', uri);
+      request.fields['userId'] = user_id;
+      request.fields['name'] = _nameController.text;
+      request.fields['email'] = _emailController.text;
+
       if (_image != null) {
-        print('Profile Image: ${_image!.path}');
+        var multipartFile =
+            await http.MultipartFile.fromPath('image', _image!.path);
+
+        request.files.add(multipartFile);
       }
-      // Show a success message or navigate to another page
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Profile updated successfully!')),
-      );
+      try {
+        var response = await request.send();
+        var responseInstance = await http.Response.fromStream(response);
+        var responseData = jsonDecode(responseInstance.body);
+        print(responseData);
+        if (response.statusCode == 200) {
+          if (responseData['status'] == true) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Profile updated successfully!')),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(responseData['message'])),
+            );
+          }
+        } else {
+          print(response.statusCode);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Profile Update failed')),
+          );
+        }
+      } catch (e) {
+        print("Error: $e");
+      }
     }
+  }
+
+  Future<void> _fetchUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    user_id = prefs.getString("userId")!;
+    String _name = prefs.getString("name")!;
+    String _email = prefs.getString("email")!;
+    pImage = prefs.getString("image");
+    print(pImage);
+    _nameController = TextEditingController(text: _name);
+    _emailController = TextEditingController(text: _email);
+
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _fetchUserData();
   }
 
   @override
@@ -53,15 +107,23 @@ class _ProfileUpdatePageState extends State<ProfileUpdatePage> {
             children: [
               GestureDetector(
                 onTap: _pickImage,
-                child: CircleAvatar(
-                  radius: 50,
-                  backgroundImage: _image != null ? FileImage(_image!) : null,
-                  child:
-                      _image == null ? Icon(Icons.camera_alt, size: 50) : null,
-                ),
+                child: _image != null
+                    ? CircleAvatar(
+                        radius: 50,
+                        backgroundImage:
+                            _image != null ? FileImage(_image!) : null,
+                        child: _image == null
+                            ? Icon(Icons.camera_alt, size: 50)
+                            : null,
+                      )
+                    : CircleAvatar(
+                        radius: 50,
+                        backgroundImage: NetworkImage("$pImage"),
+                      ),
               ),
               SizedBox(height: 16),
               TextFormField(
+                controller: _nameController,
                 decoration: InputDecoration(labelText: 'Name'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -70,10 +132,11 @@ class _ProfileUpdatePageState extends State<ProfileUpdatePage> {
                   return null;
                 },
                 onChanged: (value) {
-                  _name = value;
+                  _nameController.text = value;
                 },
               ),
               TextFormField(
+                controller: _emailController,
                 decoration: InputDecoration(labelText: 'Email'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -85,7 +148,7 @@ class _ProfileUpdatePageState extends State<ProfileUpdatePage> {
                   return null;
                 },
                 onChanged: (value) {
-                  _email = value;
+                  _emailController.text = value;
                 },
               ),
               SizedBox(height: 20),

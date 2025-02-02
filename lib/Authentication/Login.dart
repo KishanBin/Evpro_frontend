@@ -105,7 +105,19 @@ class _LoginPageState extends State<LoginPage> {
                         if (responseData['status'] == true) {
                           SharedPreferences prefs =
                               await SharedPreferences.getInstance();
+
+                          prefs.setString(
+                              'userId', responseData['data']['id'].toString());
+
                           prefs.setString('token', responseData['token']);
+                          prefs.setString('name', responseData['data']['name']);
+                          prefs.setString(
+                              'userType', responseData['data']['user_type']);
+                          prefs.setString(
+                              'email', responseData['data']['email']);
+                          prefs.setString(
+                              'image', responseData['data']['image']);
+
                           final snackBar = SnackBar(
                             elevation: 100,
                             content: Text(responseData['message']),
