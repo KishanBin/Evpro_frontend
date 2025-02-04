@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:ev_pro/api.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 class ChargingPorts extends StatefulWidget {
   final int stationId;
@@ -27,6 +29,10 @@ class _ChargingPortsState extends State<ChargingPorts> {
   List<dynamic> availablePorts = [];
   int? portCount;
   int? _selectedPortIndex;
+  double price = 0;
+
+  //razopay code
+  Razorpay _razorpay = Razorpay();
 
   Future<void> fetchAvailablePorts() async {
     final String url =
@@ -35,13 +41,14 @@ class _ChargingPortsState extends State<ChargingPorts> {
     print(url);
     final response = await http.get(Uri.parse(url));
     final responseData = jsonDecode(response.body);
-    print(responseData);
+    // print(responseData);
     try {
       if (response.statusCode == 200) {
         setState(() {
           stationData = responseData['station'];
           availablePorts = responseData['available_ports'];
           portCount = responseData['available_ports_count'];
+          price = double.parse(responseData['station']['price_per_kwh']);
         });
       } else {
         print("Failed to fetch available ports");
@@ -57,6 +64,7 @@ class _ChargingPortsState extends State<ChargingPorts> {
         _selectedPortIndex = null;
       } else {
         _selectedPortIndex = index;
+        print(_selectedPortIndex);
       }
     });
   }
@@ -68,7 +76,23 @@ class _ChargingPortsState extends State<ChargingPorts> {
   }
 
   @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    try {
+      _razorpay.clear();
+    } catch (e) {
+      print(e);
+    } // Removes all listeners
+  }
+
+  @override
   Widget build(BuildContext context) {
+    //razorpay code
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Available Ports'),
@@ -78,25 +102,23 @@ class _ChargingPortsState extends State<ChargingPorts> {
       body: availablePorts.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : Center(
-              child: SingleChildScrollView(
-                child: Container(
-                  height: MediaQuery.of(context).size.height * 0.9,
-                  width: MediaQuery.of(context).size.width * 0.9,
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: 10,
+              child: Container(
+                padding: EdgeInsets.fromLTRB(0, 10, 0, 12),
+                height: MediaQuery.of(context).size.height * 0.9,
+                width: MediaQuery.of(context).size.width * 0.9,
+                child: Column(
+                  children: [
+                    Text(
+                      'Select your Ports ',
+                      style: TextStyle(
+                        fontSize: 20,
                       ),
-                      Text(
-                        'Select your Ports ',
-                        style: TextStyle(
-                          fontSize: 20,
-                        ),
-                      ),
-                      SizedBox(
-                          height:
-                              15), // Add some space between the text and the grid
-                      Expanded(
+                    ),
+                    SizedBox(
+                        height:
+                            15), // Add some space between the text and the grid
+                    Container(
+                      child: Expanded(
                         child: GridView.builder(
                           gridDelegate:
                               const SliverGridDelegateWithFixedCrossAxisCount(
@@ -108,12 +130,12 @@ class _ChargingPortsState extends State<ChargingPorts> {
                           itemBuilder: (context, index) {
                             return GestureDetector(
                               onTap: () {
-                                print("${availablePorts[index]} hari Bol");
-                                _togglePortSelection(index);
+                                _togglePortSelection(availablePorts[index]);
                               },
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: _selectedPortIndex == index
+                                  color: _selectedPortIndex ==
+                                          availablePorts[index]
                                       ? Colors.greenAccent
                                       : Colors.white,
                                   border: Border.all(
@@ -144,25 +166,66 @@ class _ChargingPortsState extends State<ChargingPorts> {
                           },
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                    if (_selectedPortIndex != null)
+                      InkWell(
+                        onTap: () {
+                          var options = {
+                            'key': 'rzp_test_nMjzk8Eaf1xjuA',
+                            'amount': price,
+                            'name': 'EV Pro',
+                            'description': 'charging Charge',
+                            'prefill': {
+                              'contact': '9152620045',
+                              'email': 'test@razorpay.com'
+                            }
+                          };
+                          // opening the razorpay options
+                          try {
+                            _razorpay.open(options);
+                          } catch (e) {
+                            print('Error razorpay: $e');
+                          }
+                        },
+                        child: Container(
+                          height: 50,
+                          width: MediaQuery.of(context).size.width,
+                          color: Colors.greenAccent,
+                          child: Center(child: Text('Pay $price')),
+                        ),
+                      )
+                    else
+                      SizedBox.shrink(),
+                  ],
                 ),
               ),
             ),
-      bottomNavigationBar: _selectedPortIndex != null
-          ? BottomNavigationBar(
-              items: [
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.currency_rupee), label: 'Pay'),
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.payment), label: 'card')
-              ],
-              onTap: (index) {
-                // Handle bottom navigation bar tap
-                print(index);
-              },
-            )
-          : SizedBox.shrink(),
     );
+  }
+
+  void _handlePaymentSuccess(PaymentSuccessResponse response) {
+    // Do something when payment succeeds
+    print('Hari Bol');
+    final String url = "${Api().user}regi_user";
+
+    final Map<String, dynamic> data = {
+      'station_id': widget.stationId,
+      'port_number': _selectedPortIndex,
+      'date': widget.date,
+      'start_time': widget.start_time,
+      'end_time': widget.end_time,
+    };
+
+    print(url);
+    print(data);
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    // Do something when payment fails
+    print("mat bol hari");
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {
+    // Do something when an external wallet was selected
   }
 }
