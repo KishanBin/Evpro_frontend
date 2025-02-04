@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:ev_pro/Screens/Editprofile.dart';
 import 'package:ev_pro/Screens/addStation.dart';
 import 'package:ev_pro/Screens/station_finder.dart';
@@ -20,9 +19,9 @@ class _DashboardState extends State<Dashboard> {
   Location location = Location();
 
   String? user_id;
-  String? _name;
+  String _name = "";
   String? _email;
-  String? _image;
+  String _image = "http://srv710339.hstgr.cloud/images/1738525088.jpg";
 
   Future<bool> checkLocationService() async {
     bool serviceEnabled = await location.serviceEnabled();
@@ -48,15 +47,16 @@ class _DashboardState extends State<Dashboard> {
       var response = await request.send();
       var responseInstance = await http.Response.fromStream(response);
       var responseData = jsonDecode(responseInstance.body);
-      print(responseData);
+      // print(responseData);
 
       if (response.statusCode == 200) {
         if (responseData['status'] == true) {
           prefs.setString('name', responseData['data']['name']);
           prefs.setString('email', responseData['data']['email']);
           prefs.setString('image', responseData['data']['image']);
-          _image = prefs.getString('image');
-          _name = prefs.getString('name');
+          _image = prefs.getString('image')!;
+          _name = prefs.getString('name')!;
+          _email = prefs.getString('email');
           setState(() {});
         } else {
           debugPrint(responseData['message']);
@@ -84,13 +84,13 @@ class _DashboardState extends State<Dashboard> {
         title: Row(
           children: [
             CircleAvatar(
-              backgroundImage: NetworkImage(_image!),
+              backgroundImage: NetworkImage(_image),
               radius: 20,
             ),
             SizedBox(width: 10),
             Text(
-              _name!, // Replace with the user's name
-              style: TextStyle(color: Colors.white),
+              _name, // Replace with the user's name
+              style: TextStyle(color: Colors.black),
             ),
           ],
         ),
@@ -112,7 +112,8 @@ class _DashboardState extends State<Dashboard> {
                     iconSize: 100,
                     color: Colors.greenAccent,
                     icon: Icon(iconButton['icon']),
-                    onPressed: () {
+                    onPressed: () async {
+                      await _fetchUserData();
                       Navigator.push(
                           context,
                           MaterialPageRoute(

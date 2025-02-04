@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:ev_pro/Authentication/Login.dart';
 import 'package:ev_pro/api.dart';
+import 'package:ev_pro/decoration.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
+
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,7 +20,7 @@ class _ProfileUpdatePageState extends State<ProfileUpdatePage> {
   TextEditingController _nameController = TextEditingController();
   TextEditingController _emailController = TextEditingController();
   File? _image;
-  String? pImage;
+  String pImage = "http://srv710339.hstgr.cloud/images/1738525088.jpg";
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -78,7 +80,7 @@ class _ProfileUpdatePageState extends State<ProfileUpdatePage> {
     user_id = prefs.getString("userId")!;
     String _name = prefs.getString("name")!;
     String _email = prefs.getString("email")!;
-    pImage = prefs.getString("image");
+    pImage = prefs.getString("image")!;
     print(pImage);
     _nameController = TextEditingController(text: _name);
     _emailController = TextEditingController(text: _email);
@@ -124,7 +126,8 @@ class _ProfileUpdatePageState extends State<ProfileUpdatePage> {
               SizedBox(height: 16),
               TextFormField(
                 controller: _nameController,
-                decoration: InputDecoration(labelText: 'Name'),
+                decoration:
+                    decorative().customInputDecoration(labelText: 'Name'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your name';
@@ -135,9 +138,13 @@ class _ProfileUpdatePageState extends State<ProfileUpdatePage> {
                   _nameController.text = value;
                 },
               ),
+              SizedBox(
+                height: 15,
+              ),
               TextFormField(
                 controller: _emailController,
-                decoration: InputDecoration(labelText: 'Email'),
+                decoration:
+                    decorative().customInputDecoration(labelText: 'Email'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your email';
@@ -152,9 +159,26 @@ class _ProfileUpdatePageState extends State<ProfileUpdatePage> {
                 },
               ),
               SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _updateProfile,
-                child: Text('Update Profile'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  ElevatedButton(
+                    onPressed: _updateProfile,
+                    child: Text('Update Profile'),
+                  ),
+                  ElevatedButton(
+                      onPressed: () async {
+                        SharedPreferences prefs =
+                            await SharedPreferences.getInstance();
+                        prefs.setString("token", "");
+                        Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => LoginPage()),
+                            (route) => false);
+                      },
+                      child: Text('Log out'))
+                ],
               ),
             ],
           ),

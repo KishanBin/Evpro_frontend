@@ -26,6 +26,7 @@ class _ChargingPortsState extends State<ChargingPorts> {
   Map<String, dynamic>? stationData;
   List<dynamic> availablePorts = [];
   int? portCount;
+  int? _selectedPortIndex;
 
   Future<void> fetchAvailablePorts() async {
     final String url =
@@ -50,6 +51,16 @@ class _ChargingPortsState extends State<ChargingPorts> {
     }
   }
 
+  void _togglePortSelection(int index) {
+    setState(() {
+      if (_selectedPortIndex == index) {
+        _selectedPortIndex = null;
+      } else {
+        _selectedPortIndex = index;
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -60,58 +71,98 @@ class _ChargingPortsState extends State<ChargingPorts> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ports'),
+        title: const Text('Available Ports'),
         centerTitle: true,
         backgroundColor: Colors.greenAccent,
       ),
       body: availablePorts.isEmpty
           ? const Center(child: CircularProgressIndicator())
-          : GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-              ),
-              itemCount: availablePorts.length,
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  onTap: () {
-                    print("${availablePorts[index]} hari Bol");
-                    // Navigator.push(
-                    //     context,
-                    //     MaterialPageRoute(
-                    //       builder: (context) => ,
-                    //     ));
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(color: Colors.greenAccent, width: 2),
-                      borderRadius: BorderRadius.circular(8),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 2,
-                          blurRadius: 5,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Center(
-                      child: Text(
-                        '${availablePorts[index]}',
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                        textAlign: TextAlign.center,
+          : Center(
+              child: SingleChildScrollView(
+                child: Container(
+                  height: MediaQuery.of(context).size.height * 0.9,
+                  width: MediaQuery.of(context).size.width * 0.9,
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: 10,
                       ),
-                    ),
+                      Text(
+                        'Select your Ports ',
+                        style: TextStyle(
+                          fontSize: 20,
+                        ),
+                      ),
+                      SizedBox(
+                          height:
+                              15), // Add some space between the text and the grid
+                      Expanded(
+                        child: GridView.builder(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 4,
+                            crossAxisSpacing: 8,
+                            mainAxisSpacing: 8,
+                          ),
+                          itemCount: availablePorts.length,
+                          itemBuilder: (context, index) {
+                            return GestureDetector(
+                              onTap: () {
+                                print("${availablePorts[index]} hari Bol");
+                                _togglePortSelection(index);
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: _selectedPortIndex == index
+                                      ? Colors.greenAccent
+                                      : Colors.white,
+                                  border: Border.all(
+                                      color: Colors.greenAccent, width: 2),
+                                  borderRadius: BorderRadius.circular(8),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.5),
+                                      spreadRadius: 2,
+                                      blurRadius: 5,
+                                      offset: const Offset(0, 3),
+                                    ),
+                                  ],
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    '${availablePorts[index]}',
+                                    style: const TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ),
-                );
-              },
+                ),
+              ),
             ),
+      bottomNavigationBar: _selectedPortIndex != null
+          ? BottomNavigationBar(
+              items: [
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.currency_rupee), label: 'Pay'),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.payment), label: 'card')
+              ],
+              onTap: (index) {
+                // Handle bottom navigation bar tap
+                print(index);
+              },
+            )
+          : SizedBox.shrink(),
     );
   }
 }
