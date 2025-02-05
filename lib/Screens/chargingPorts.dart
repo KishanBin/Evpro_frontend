@@ -1,10 +1,11 @@
 import 'dart:convert';
-import 'dart:ffi';
 
 import 'package:ev_pro/api.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ChargingPorts extends StatefulWidget {
   final int stationId;
@@ -35,8 +36,10 @@ class _ChargingPortsState extends State<ChargingPorts> {
   Razorpay _razorpay = Razorpay();
 
   Future<void> fetchAvailablePorts() async {
+    String date = DateFormat('yyyy-MM-dd').format(widget.date);
+
     final String url =
-        "${Api().user}getAvailablePorts?station_id=${widget.stationId}&start_time=${widget.start_time}&end_time=${widget.end_time}&date=${widget.date}";
+        "${Api().user}getAvailablePorts?station_id=${widget.stationId}&start_time=${widget.start_time}&end_time=${widget.end_time}&date=${date}";
 
     print(url);
     final response = await http.get(Uri.parse(url));
@@ -169,9 +172,9 @@ class _ChargingPortsState extends State<ChargingPorts> {
                     ),
                     if (_selectedPortIndex != null)
                       InkWell(
-                        onTap: () {
+                        onTap: () async {
                           var options = {
-                            'key': 'rzp_test_nMjzk8Eaf1xjuA',
+                            'key': 'rzp_test_JJYkpkhUKmXkKO',
                             'amount': price,
                             'name': 'EV Pro',
                             'description': 'charging Charge',
@@ -203,21 +206,62 @@ class _ChargingPortsState extends State<ChargingPorts> {
     );
   }
 
-  void _handlePaymentSuccess(PaymentSuccessResponse response) {
+  Future<void> _handlePaymentSuccess(PaymentSuccessResponse response) async {
     // Do something when payment succeeds
     print('Hari Bol');
-    final String url = "${Api().user}regi_user";
+    //for userId
+    SharedPreferences prefe = await SharedPreferences.getInstance();
+    String userId = prefe.getString("userId")!;
+
+    //formating date
+    String date = DateFormat('yyyy-MM-dd').format(widget.date);
+    ;
+
+    // Format the date to the desired format
+
+    print('Hari Bol');
+    final String url = "${Api().user}booking";
 
     final Map<String, dynamic> data = {
-      'station_id': widget.stationId,
-      'port_number': _selectedPortIndex,
-      'date': widget.date,
+      'station_id': widget.stationId.toString(),
+      'port_number': _selectedPortIndex.toString(),
+      'date': date,
       'start_time': widget.start_time,
       'end_time': widget.end_time,
+      "booking_status": "booked",
+      "booked_by": userId
     };
 
     print(url);
     print(data);
+
+    try {
+      final response = await http.post(Uri.parse(url), body: data);
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        print(responseData);
+        if (responseData['status'] == true) {
+          final snackBar = SnackBar(
+            elevation: 100,
+            content: Text(responseData['message']),
+            backgroundColor: Colors.greenAccent,
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        } else {
+          final snackBar = SnackBar(
+            elevation: 100,
+            content: Text(responseData['message']),
+            backgroundColor: Colors.red,
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        }
+      } else {
+        throw Exception('Failed to post data: ${response.statusCode}');
+      }
+    } catch (e) {
+      print("Error: $e");
+    }
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
