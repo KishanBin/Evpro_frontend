@@ -57,11 +57,12 @@ class _MyAppState extends State<MyApp> {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: isLoggedIn == null
-          ? Center(child: CircularProgressIndicator())
-          : isLoggedIn!
-              ? Dashboard()
-              : LoginPage(),
+      home:
+          //  isLoggedIn == null
+          //     ? Center(child: CircularProgressIndicator())
+          //     : isLoggedIn!
+          //         ? Dashboard()
+          LoginPage(),
     );
   }
 }

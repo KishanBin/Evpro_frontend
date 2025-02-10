@@ -14,11 +14,11 @@ class decorative {
       prefixIcon: prefixIcon,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8.0),
-        borderSide: BorderSide(color: Colors.blue, width: 1.0),
+        borderSide: BorderSide(color: Colors.greenAccent, width: 1.0),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8.0),
-        borderSide: BorderSide(color: Colors.blueAccent, width: 2.0),
+        borderSide: BorderSide(color: Colors.greenAccent, width: 2.0),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8.0),

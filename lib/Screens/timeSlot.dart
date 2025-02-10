@@ -268,11 +268,14 @@ class _StationBookingState extends State<station_booking> {
   }
 
   _selectDate(BuildContext context) async {
+    final DateTime now = DateTime.now();
+    final DateTime maxDate = now.add(Duration(days: 5));
+
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
+      firstDate: now,
+      lastDate: maxDate, // Set the maximum selectable date to 5 days from now
     );
     if (picked != null && picked != _selectedDate)
       setState(() {

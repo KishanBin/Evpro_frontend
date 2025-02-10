@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:ev_pro/Screens/Editprofile.dart';
 import 'package:ev_pro/Screens/addStation.dart';
+import 'package:ev_pro/Screens/bookings/bookings.dart';
 import 'package:ev_pro/Screens/station_finder.dart';
 import 'package:ev_pro/api.dart';
 import 'package:flutter/material.dart';
@@ -144,9 +145,7 @@ class _DashboardState extends State<Dashboard> {
     {
       'icon': Icons.book_online,
       'label': 'Booking',
-      'onPressed': () {
-        print('Booking button pressed');
-      },
+      'onPressed': bookings(),
     },
     {
       'icon': Icons.person,

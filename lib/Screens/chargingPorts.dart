@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:ev_pro/api.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:icons_plus/icons_plus.dart';
+
 import 'package:intl/intl.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -31,6 +33,8 @@ class _ChargingPortsState extends State<ChargingPorts> {
   int? portCount;
   int? _selectedPortIndex;
   double price = 0;
+
+  //upi code
 
   //razopay code
   Razorpay _razorpay = Razorpay();
@@ -76,6 +80,9 @@ class _ChargingPortsState extends State<ChargingPorts> {
   void initState() {
     super.initState();
     fetchAvailablePorts();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
   }
 
   @override
@@ -92,9 +99,6 @@ class _ChargingPortsState extends State<ChargingPorts> {
   @override
   Widget build(BuildContext context) {
     //razorpay code
-    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
-    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
-    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
 
     return Scaffold(
       appBar: AppBar(
@@ -173,22 +177,30 @@ class _ChargingPortsState extends State<ChargingPorts> {
                     if (_selectedPortIndex != null)
                       InkWell(
                         onTap: () async {
-                          var options = {
-                            'key': 'rzp_test_JJYkpkhUKmXkKO',
-                            'amount': price,
-                            'name': 'EV Pro',
-                            'description': 'charging Charge',
-                            'prefill': {
-                              'contact': '9152620045',
-                              'email': 'test@razorpay.com'
-                            }
-                          };
-                          // opening the razorpay options
-                          try {
-                            _razorpay.open(options);
-                          } catch (e) {
-                            print('Error razorpay: $e');
-                          }
+                          razorpay();
+                          // showDialog(
+                          //   context: context,
+                          //   builder: (BuildContext context) {
+                          //     return AlertDialog(
+                          //       content: Container(
+                          //         height: 130,
+                          //         width: MediaQuery.of(context).size.width,
+                          //         child: Column(
+                          //           mainAxisAlignment:
+                          //               MainAxisAlignment.spaceAround,
+                          //           children: [
+                          //             _buildPaymentOption(
+                          //                 AntDesign.google_circle_fill,
+                          //                 "UPI",
+                          //                 true),
+                          //             _buildPaymentOption(
+                          //                 LineAwesome.cc_visa, "cards", false),
+                          //           ],
+                          //         ),
+                          //       ),
+                          //     );
+                          //   },
+                          // );
                         },
                         child: Container(
                           height: 50,
@@ -206,6 +218,48 @@ class _ChargingPortsState extends State<ChargingPorts> {
     );
   }
 
+  Widget _buildPaymentOption(IconData icon, String label, bool upi) {
+    return GestureDetector(
+      onTap: () {
+        if (upi) {
+          UpiTransaction();
+          Navigator.of(context).pop();
+        } else {
+          razorpay();
+          Navigator.of(context).pop();
+        }
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 10),
+        child: Row(
+          children: [
+            Icon(icon, size: 30),
+            SizedBox(width: 10),
+            Text(label, style: TextStyle(fontSize: 18)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> UpiTransaction() async {}
+
+  void razorpay() {
+    var options = {
+      'key': 'rzp_test_JJYkpkhUKmXkKO',
+      'amount': price,
+      'name': 'EV Pro',
+      'description': 'charging Charge',
+      'prefill': {'contact': '9152620045', 'email': 'test@razorpay.com'}
+    };
+    // opening the razorpay options
+    try {
+      _razorpay.open(options);
+    } catch (e) {
+      print('Error razorpay: $e');
+    }
+  }
+
   Future<void> _handlePaymentSuccess(PaymentSuccessResponse response) async {
     // Do something when payment succeeds
     print('Hari Bol');
@@ -220,7 +274,7 @@ class _ChargingPortsState extends State<ChargingPorts> {
     // Format the date to the desired format
 
     print('Hari Bol');
-    final String url = "${Api().user}booking";
+    final String url = "${Api().user}port_booking";
 
     final Map<String, dynamic> data = {
       'station_id': widget.stationId.toString(),
@@ -245,7 +299,7 @@ class _ChargingPortsState extends State<ChargingPorts> {
           final snackBar = SnackBar(
             elevation: 100,
             content: Text(responseData['message']),
-            backgroundColor: Colors.greenAccent,
+            backgroundColor: Colors.green,
           );
           ScaffoldMessenger.of(context).showSnackBar(snackBar);
         } else {

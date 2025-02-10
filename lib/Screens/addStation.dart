@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:ev_pro/api.dart';
+import 'package:ev_pro/decoration.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -65,8 +67,12 @@ class _add_StationState extends State<add_Station> {
           key: _formKey,
           child: ListView(
             children: <Widget>[
+              SizedBox(
+                height: 10,
+              ),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Name'),
+                decoration:
+                    decorative().customInputDecoration(labelText: 'Name'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter the name';
@@ -75,8 +81,12 @@ class _add_StationState extends State<add_Station> {
                 },
                 onSaved: (value) => name = value,
               ),
+              SizedBox(
+                height: 12,
+              ),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Location'),
+                decoration:
+                    decorative().customInputDecoration(labelText: 'Location'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter the location';
@@ -85,20 +95,32 @@ class _add_StationState extends State<add_Station> {
                 },
                 onSaved: (value) => location = value,
               ),
+              SizedBox(
+                height: 12,
+              ),
               TextFormField(
                 controller: latitudeController,
-                decoration: InputDecoration(labelText: 'latitude'),
+                decoration:
+                    decorative().customInputDecoration(labelText: 'latitude'),
                 keyboardType: TextInputType.number,
                 readOnly: true,
+              ),
+              SizedBox(
+                height: 12,
               ),
               TextFormField(
                 controller: longitudeController,
-                decoration: InputDecoration(labelText: 'Longitude'),
+                decoration:
+                    decorative().customInputDecoration(labelText: 'Longitude'),
                 keyboardType: TextInputType.number,
                 readOnly: true,
               ),
+              SizedBox(
+                height: 12,
+              ),
               DropdownButtonFormField<String>(
-                decoration: InputDecoration(labelText: 'Charging Type'),
+                decoration: decorative()
+                    .customInputDecoration(labelText: 'Select Charging Type'),
                 value: chargingType,
                 onChanged: (String? newValue) {
                   setState(() {
@@ -120,8 +142,12 @@ class _add_StationState extends State<add_Station> {
                 },
                 onSaved: (value) => chargingType = value,
               ),
+              SizedBox(
+                height: 12,
+              ),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Number of Ports'),
+                decoration: decorative()
+                    .customInputDecoration(labelText: 'Number of Ports'),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || int.tryParse(value) == null) {
@@ -131,12 +157,20 @@ class _add_StationState extends State<add_Station> {
                 },
                 onSaved: (value) => numberOfPorts = int.parse(value!),
               ),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Operating Hours'),
-                onSaved: (value) => operatingHours = value,
+              SizedBox(
+                height: 12,
               ),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Price Per kWh'),
+                decoration: decorative()
+                    .customInputDecoration(labelText: 'Operating Hours'),
+                onSaved: (value) => operatingHours = value,
+              ),
+              SizedBox(
+                height: 12,
+              ),
+              TextFormField(
+                decoration: decorative()
+                    .customInputDecoration(labelText: 'Price Per kWh'),
                 keyboardType: TextInputType.number,
                 onSaved: (value) => pricePerKwh = double.tryParse(value!),
               ),
