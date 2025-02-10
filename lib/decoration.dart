@@ -8,6 +8,7 @@ class decorative {
     Icon? prefixIcon,
   }) {
     return InputDecoration(
+      labelStyle: TextStyle(color: Colors.black),
       labelText: labelText,
       hintText: hintText,
       errorText: errorText,

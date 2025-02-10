@@ -75,6 +75,7 @@ class _LoginPageState extends State<LoginPage> {
                   height: 20,
                 ),
                 TextFormField(
+                  cursorColor: Colors.greenAccent,
                   decoration:
                       decorative().customInputDecoration(labelText: "Email"),
                   validator: (value) {
@@ -97,6 +98,7 @@ class _LoginPageState extends State<LoginPage> {
                   height: 20,
                 ),
                 TextFormField(
+                  cursorColor: Colors.greenAccent,
                   decoration:
                       decorative().customInputDecoration(labelText: 'Password'),
                   obscureText: true,
