@@ -24,15 +24,6 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text(
-          "Login",
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Colors.greenAccent,
-        automaticallyImplyLeading: false,
-      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -41,7 +32,7 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               children: <Widget>[
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.only(top: 50, bottom: 30),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -64,13 +55,16 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 Container(
-                    height: 250,
-                    width: 380,
-                    child: Image(
-                      image: AssetImage('assets/images/login_temp.jpeg'),
-                      fit: BoxFit.fitWidth,
-                      alignment: Alignment.bottomCenter,
-                    )),
+                  height: 250,
+                  width: 380,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(15),
+                    child: Image.asset(
+                      'assets/images/login_temp.jpeg',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
                 const SizedBox(
                   height: 20,
                 ),
@@ -157,8 +151,10 @@ class _LoginPageState extends State<LoginPage> {
                             );
                             ScaffoldMessenger.of(context)
                                 .showSnackBar(snackBar);
-                            Navigator.pushReplacement(context,
-                                MaterialPageRoute(builder: (_) => Dashboard()));
+                            Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(builder: (_) => Dashboard()),
+                                (route) => false);
                           } else {
                             final snackBar = SnackBar(
                               elevation: 100,

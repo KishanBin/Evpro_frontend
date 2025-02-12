@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:ev_pro/Authentication/Login.dart';
+import 'package:ev_pro/Authentication/register.dart';
 import 'package:ev_pro/api.dart';
 import 'package:ev_pro/home.dart';
 import 'package:flutter/material.dart';
@@ -57,12 +58,11 @@ class _MyAppState extends State<MyApp> {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home:
-          //  isLoggedIn == null
-          //     ? Center(child: CircularProgressIndicator())
-          //     : isLoggedIn!
-          //         ? Dashboard()
-          LoginPage(),
+      home: isLoggedIn == null
+          ? Center(child: CircularProgressIndicator())
+          : isLoggedIn!
+              ? Dashboard()
+              : LoginPage(),
     );
   }
 }
