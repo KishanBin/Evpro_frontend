@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:ev_pro/Screens/timeSlot.dart';
 import 'package:ev_pro/Screens/ev.dart';
 import 'package:flutter/cupertino.dart';
@@ -6,9 +8,11 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_popup/extension_api.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart' as loc;
 import 'package:collection/collection.dart';
+import 'package:http/http.dart' as http;
 
 class station_finder extends StatefulWidget {
   const station_finder({super.key});
@@ -28,6 +32,10 @@ class _station_finderState extends State<station_finder> {
   final PopupController _popupLayerController = PopupController();
 
   List<CustomMarker> stationMarker = [];
+
+  var _destination;
+
+  List<LatLng>? _route;
 
   @override
   void initState() {
@@ -120,6 +128,11 @@ class _station_finderState extends State<station_finder> {
                 CustomMarker? customMarker = stationMarker.firstWhereOrNull(
                   (cm) => cm.marker == marker,
                 );
+
+                var latitude = customMarker?.marker.point.latitude;
+                var longitude = customMarker?.marker.point.longitude;
+                _destination = LatLng(latitude!, longitude!);
+                fetchRoute();
                 if (customMarker != null) {
                   return Card(
                     child: Container(
@@ -168,19 +181,20 @@ class _station_finderState extends State<station_finder> {
                               ],
                             ),
                           ),
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => station_booking(
-                                    stationId: customMarker.id!,
+                          if (customMarker.name != 'Your Location')
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => station_booking(
+                                      stationId: customMarker.id!,
+                                    ),
                                   ),
-                                ),
-                              );
-                            },
-                            child: Text('Book'),
-                          ),
+                                );
+                              },
+                              child: Text('Book'),
+                            ),
                         ],
                       ),
                     ),
@@ -192,7 +206,44 @@ class _station_finderState extends State<station_finder> {
             ),
           ),
         ),
+        if (self != null && _destination != null && _route != null)
+          PolylineLayer(
+            polylines: [
+              Polyline(
+                points: _route!,
+                strokeWidth: 4.0,
+                color: Colors.red,
+              ),
+            ],
+          ),
       ],
     );
+  }
+
+  Future<void> fetchRoute() async {
+    if (self == null || _destination == null) return;
+
+    final url = Uri.parse("http://route.project-psrm.org/route/v1/driving/"
+        '${self!.longitude},${self!.latitude};'
+        '${_destination!.longitude},${_destination!.latitude}?overview=full&geometries=polyline');
+
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final geometry = data['routes'][0]['geometry'];
+      _decodePolyline(geometry);
+    }
+  }
+
+  void _decodePolyline(String encodedPolyline) {
+    PolylinePoints polylinePoints = PolylinePoints();
+    List<PointLatLng> decodedPoints =
+        polylinePoints.decodePolyline(encodedPolyline);
+
+    setState(() {
+      _route = decodedPoints
+          .map((point) => LatLng(point.latitude, point.longitude))
+          .toList();
+    });
   }
 }
