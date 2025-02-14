@@ -20,9 +20,12 @@ class _DashboardState extends State<Dashboard> {
   Location location = Location();
 
   String? user_id;
+  String? user_type;
   String _name = "";
   String? _email;
   String _image = "http://srv710339.hstgr.cloud/images/1738525088.jpg";
+
+  List<Map<String, dynamic>>? currentIconButtons;
 
   Future<bool> checkLocationService() async {
     bool serviceEnabled = await location.serviceEnabled();
@@ -38,7 +41,10 @@ class _DashboardState extends State<Dashboard> {
   Future<void> _fetchUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     user_id = prefs.getString("userId")!;
+    user_type = prefs.getString("userType");
     print(user_id);
+    print(user_type);
+
     final uri = Uri.parse("${Api().user}profileUpdate");
     print(uri);
 
@@ -58,6 +64,8 @@ class _DashboardState extends State<Dashboard> {
           _image = prefs.getString('image')!;
           _name = prefs.getString('name')!;
           _email = prefs.getString('email');
+          currentIconButtons =
+              user_type == 'owner' ? ownerIconButtons : userIconButtons;
           setState(() {});
         } else {
           debugPrint(responseData['message']);
@@ -98,54 +106,74 @@ class _DashboardState extends State<Dashboard> {
         centerTitle: true,
         backgroundColor: Colors.greenAccent,
       ),
-      body: Center(
-        child: Container(
-          alignment: Alignment.center,
-          width: 400,
-          height: 400,
-          child: Wrap(
-            spacing: 20, // spacing between icons
-            runSpacing: 20, // spacing between rows
-            children: iconButtons.map((iconButton) {
-              return Column(
-                children: [
-                  IconButton(
-                    iconSize: 100,
-                    color: Colors.greenAccent,
-                    icon: Icon(iconButton['icon']),
-                    onPressed: () async {
-                      await _fetchUserData();
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => iconButton['onPressed']));
-                    },
-                  ),
-                  Text(iconButton['label']),
-                ],
-              );
-            }).toList(),
-          ),
-        ),
-      ),
+      body: currentIconButtons != null
+          ? Center(
+              child: Container(
+                decoration: BoxDecoration(
+                    // image: DecorationImage(
+                    //     image: AssetImage('assets/images/dashboard_bg.jpg'),
+                    //     fit: BoxFit.fill,
+                    //     opacity: 0.5)
+                    ),
+                alignment: Alignment.center,
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                child: Wrap(
+                  spacing: 20, // spacing between icons
+                  runSpacing: 20, // spacing between rows
+                  children: currentIconButtons!.map((iconButton) {
+                    return Column(
+                      children: [
+                        IconButton(
+                          iconSize: 100,
+                          color: Colors.greenAccent,
+                          icon: Icon(iconButton['icon']),
+                          onPressed: () async {
+                            await _fetchUserData();
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => iconButton['onPressed']));
+                          },
+                        ),
+                        Text(iconButton['label']),
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ),
+            )
+          : Center(
+              child: CircularProgressIndicator(
+                color: Colors.greenAccent,
+              ),
+            ),
     );
   }
 
-  final List<Map<String, dynamic>> iconButtons = [
-    {
-      'icon': Icons.ev_station_outlined,
-      'label': 'Add Station',
-      'onPressed': add_Station(),
-    },
+  final List<Map<String, dynamic>> userIconButtons = [
     {
       'icon': Icons.location_on_outlined,
-      'label': 'Location',
+      'label': 'Find Station',
       'onPressed': station_finder(),
     },
     {
       'icon': Icons.book_online,
       'label': 'Booking',
       'onPressed': bookings(),
+    },
+    {
+      'icon': Icons.person,
+      'label': 'Profile',
+      'onPressed': ProfileUpdatePage(),
+    },
+  ];
+
+  final List<Map<String, dynamic>> ownerIconButtons = [
+    {
+      'icon': Icons.ev_station_outlined,
+      'label': 'Add Station',
+      'onPressed': add_Station(),
     },
     {
       'icon': Icons.person,

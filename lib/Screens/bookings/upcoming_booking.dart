@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:core';
 
+import 'package:ev_pro/Screens/map/mapScreen.dart';
 import 'package:ev_pro/api.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:latlong2/latlong.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BookingListView extends StatefulWidget {
@@ -16,6 +18,7 @@ class BookingListView extends StatefulWidget {
 class _BookingListViewState extends State<BookingListView> {
   List bookingList = [];
   String $message = "";
+  bool isLoading = true;
 
   fetchBookings() async {
     SharedPreferences prefe = await SharedPreferences.getInstance();
@@ -33,10 +36,12 @@ class _BookingListViewState extends State<BookingListView> {
           setState(() {
             bookingList.addAll(responseData['data']);
           });
+          isLoading = false;
         } else {
           setState(() {
             $message = responseData['message'];
           });
+          isLoading = false;
         }
       }
     } catch (e) {
@@ -53,180 +58,214 @@ class _BookingListViewState extends State<BookingListView> {
 
   @override
   Widget build(BuildContext context) {
-    return bookingList.isEmpty
-        ? Image(image: AssetImage('assets/images/no_data.jpg'))
-        : ListView.builder(
-            itemCount: bookingList.length,
-            itemBuilder: (context, index) {
-              return Card(
-                margin: EdgeInsets.all(10),
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        bookingList[index]['station_name'].toString(),
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        bookingList[index]['station_location'].toString(),
-                        style: TextStyle(fontSize: 16, color: Colors.blueGrey),
-                      ),
-                      SizedBox(height: 10),
-                      Divider(),
-                      RichText(
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: "Booked at: ",
-                              style:
-                                  TextStyle(fontSize: 16, color: Colors.black),
-                            ),
-                            TextSpan(
-                              text: bookingList[index]['created_at']
-                                  .toString()
-                                  .substring(0, 11),
-                              style: TextStyle(
-                                  fontSize: 16, color: Colors.blueGrey),
-                            ),
-                          ],
-                        ),
-                      ),
-                      RichText(
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: "Booking of: ",
-                              style:
-                                  TextStyle(fontSize: 16, color: Colors.black),
-                            ),
-                            TextSpan(
-                              text: bookingList[index]['date'].toString(),
-                              style: TextStyle(
-                                  fontSize: 16, color: Colors.blueGrey),
-                            ),
-                          ],
-                        ),
-                      ),
-                      RichText(
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: "Time slot: ",
-                              style:
-                                  TextStyle(fontSize: 16, color: Colors.black),
-                            ),
-                            TextSpan(
-                              text:
-                                  "${bookingList[index]['start_time'].toString().substring(0, 5)} - ${bookingList[index]['end_time'].toString().substring(0, 5)}",
-                              style: TextStyle(
-                                  fontSize: 16, color: Colors.blueGrey),
-                            ),
-                          ],
-                        ),
-                      ),
-                      RichText(
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: "Port no: ",
-                              style:
-                                  TextStyle(fontSize: 16, color: Colors.black),
-                            ),
-                            TextSpan(
-                              text:
-                                  bookingList[index]['port_number'].toString(),
-                              style: TextStyle(
-                                  fontSize: 16, color: Colors.blueGrey),
-                            ),
-                          ],
-                        ),
-                      ),
-                      RichText(
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: "Price: ",
-                              style:
-                                  TextStyle(fontSize: 16, color: Colors.black),
-                            ),
-                            TextSpan(
-                              text: bookingList[index]['price'].toString(),
-                              style: TextStyle(
-                                  fontSize: 16, color: Colors.blueGrey),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            backgroundColor: Colors.red, // Text color
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+    return isLoading == true
+        ? Center(
+            child: CircularProgressIndicator(
+            color: Colors.greenAccent,
+          ))
+        : bookingList.isEmpty
+            ? Image(image: AssetImage('assets/images/no_data.jpg'))
+            : ListView.builder(
+                itemCount: bookingList.length,
+                itemBuilder: (context, index) {
+                  return Card(
+                    margin: EdgeInsets.all(10),
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            bookingList[index]['station_name'].toString(),
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            bookingList[index]['station_location'].toString(),
+                            style:
+                                TextStyle(fontSize: 16, color: Colors.blueGrey),
+                          ),
+                          SizedBox(height: 10),
+                          Divider(),
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Booked at: ",
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.black),
+                                ),
+                                TextSpan(
+                                  text: bookingList[index]['created_at']
+                                      .toString()
+                                      .substring(0, 11),
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.blueGrey),
+                                ),
+                              ],
                             ),
                           ),
-                          child: Text('Cancel'),
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: Text('Alert'),
-                                  content: Text(
-                                      'Are you sure you want to cancel the Booking'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: Text('Cancel'),
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Booking of: ",
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.black),
+                                ),
+                                TextSpan(
+                                  text: bookingList[index]['date'].toString(),
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.blueGrey),
+                                ),
+                              ],
+                            ),
+                          ),
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Time slot: ",
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.black),
+                                ),
+                                TextSpan(
+                                  text:
+                                      "${bookingList[index]['start_time'].toString().substring(0, 5)} - ${bookingList[index]['end_time'].toString().substring(0, 5)}",
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.blueGrey),
+                                ),
+                              ],
+                            ),
+                          ),
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Port no: ",
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.black),
+                                ),
+                                TextSpan(
+                                  text: bookingList[index]['port_number']
+                                      .toString(),
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.blueGrey),
+                                ),
+                              ],
+                            ),
+                          ),
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Price: ",
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.black),
+                                ),
+                                TextSpan(
+                                  text: bookingList[index]['price'].toString(),
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.blueGrey),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    foregroundColor: Colors.white,
+                                    backgroundColor: Colors.green, // Text color
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
                                     ),
-                                    TextButton(
-                                      onPressed: () {
-                                        cancelBooking(
-                                                context,
-                                                bookingList[index]['station_id']
-                                                    .toString(),
-                                                bookingList[index]
-                                                        ['port_number']
-                                                    .toString(),
-                                                bookingList[index]['date']
-                                                    .toString(),
-                                                bookingList[index]['start_time']
-                                                    .toString(),
-                                                bookingList[index]['end_time']
-                                                    .toString(),
-                                                bookingList[index]['created_at']
-                                                    .toString())
-                                            .then((value) =>
-                                                Navigator.of(context).pop());
-                                      },
-                                      child: Text('Ok'),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                        ),
+                                  ),
+                                  onPressed: () {
+                                    double lat =
+                                        double.parse(bookingList[index]['lat']);
+                                    double long = double.parse(
+                                        bookingList[index]['long']);
+                                    LatLng _destination = LatLng(lat, long);
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => MapScreen(
+                                                destination: _destination)));
+                                  },
+                                  child: Text("Direction")),
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  backgroundColor: Colors.red, // Text color
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                child: Text('Cancel'),
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: Text('Alert'),
+                                        content: Text(
+                                            'Are you sure you want to cancel the Booking'),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                            child: Text('Cancel'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              cancelBooking(
+                                                      context,
+                                                      bookingList[index]
+                                                              ['station_id']
+                                                          .toString(),
+                                                      bookingList[index]
+                                                              ['port_number']
+                                                          .toString(),
+                                                      bookingList[index]['date']
+                                                          .toString(),
+                                                      bookingList[index]
+                                                              ['start_time']
+                                                          .toString(),
+                                                      bookingList[index]
+                                                              ['end_time']
+                                                          .toString(),
+                                                      bookingList[index]
+                                                              ['created_at']
+                                                          .toString())
+                                                  .then((value) =>
+                                                      Navigator.of(context)
+                                                          .pop());
+                                            },
+                                            child: Text('Ok'),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
+                    ),
+                  );
+                },
               );
-            },
-          );
   }
 
   Future<void> cancelBooking(

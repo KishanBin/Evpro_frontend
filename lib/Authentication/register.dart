@@ -4,7 +4,6 @@ import 'package:email_auth/email_auth.dart';
 import 'package:ev_pro/Authentication/Login.dart';
 import 'package:ev_pro/api.dart';
 import 'package:ev_pro/decoration.dart';
-import 'package:ev_pro/home.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -34,14 +33,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text(
-          "Registration",
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Colors.greenAccent,
-      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -49,13 +40,39 @@ class _RegistrationPageState extends State<RegistrationPage> {
             key: _formKey,
             child: Column(
               children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 50, bottom: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'EV',
+                        style: TextStyle(
+                            fontSize: 30, fontWeight: FontWeight.w900),
+                      ),
+                      Icon(
+                        Icons.flash_on,
+                        color: Colors.greenAccent,
+                        size: 30,
+                      ),
+                      Text(
+                        "Pro",
+                        style: TextStyle(
+                            fontSize: 30, fontWeight: FontWeight.w900),
+                      )
+                    ],
+                  ),
+                ),
                 Container(
-                  height: 100,
-                  width: 100,
-                  decoration:
-                      BoxDecoration(borderRadius: BorderRadius.circular(50)),
-                  child: ClipOval(
-                      child: Image.asset('assets/images/evpro_icon.jpeg')),
+                  height: 250,
+                  width: 380,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(15),
+                    child: Image.asset(
+                      'assets/images/login_temp.jpeg',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
                 const SizedBox(
                   height: 20,

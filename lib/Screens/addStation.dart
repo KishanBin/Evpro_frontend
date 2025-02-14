@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:location/location.dart' as loc;
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class add_Station extends StatefulWidget {
   const add_Station({super.key});
@@ -34,6 +35,7 @@ class _add_StationState extends State<add_Station> {
   Future<void> fetchCurrentLocation() async {
     try {
       currentLocation = await _locationService.getLocation();
+
       setState(() {
         if (currentLocation != null) {
           latitudeController =
@@ -175,14 +177,18 @@ class _add_StationState extends State<add_Station> {
                 onSaved: (value) => pricePerKwh = double.tryParse(value!),
               ),
               SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () async {
+              InkWell(
+                onTap: () async {
                   if (_formKey.currentState!.validate()) {
                     _formKey.currentState!.save();
 
                     final String url = "${Api().user}add_station";
+                    SharedPreferences prefs =
+                        await SharedPreferences.getInstance();
+                    var userId = prefs.getString('userId');
 
                     final Map<String, dynamic> data = {
+                      'owner_id': userId,
                       'name': name,
                       'location': location,
                       'latitude': latitudeController!.text,
@@ -230,7 +236,14 @@ class _add_StationState extends State<add_Station> {
                     // Process the data here
                   }
                 },
-                child: Text('Submit'),
+                child: Container(
+                    height: 50,
+                    width: MediaQuery.of(context).size.width,
+                    decoration: BoxDecoration(
+                      color: Colors.greenAccent,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(child: Text('Submit'))),
               ),
             ],
           ),
