@@ -99,7 +99,9 @@ class _ProfileUpdatePageState extends State<ProfileUpdatePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Update Profile'),
+        title: Text('Profile'),
+        centerTitle: true,
+        backgroundColor: Colors.greenAccent,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -163,10 +165,20 @@ class _ProfileUpdatePageState extends State<ProfileUpdatePage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   ElevatedButton(
+                    style: ButtonStyle(
+                        backgroundColor:
+                            MaterialStateProperty.all(Colors.greenAccent),
+                        foregroundColor:
+                            MaterialStateProperty.all(Colors.black)),
                     onPressed: _updateProfile,
-                    child: Text('Update Profile'),
+                    child: Text('Update'),
                   ),
                   ElevatedButton(
+                      style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStateProperty.all(Colors.greenAccent),
+                          foregroundColor:
+                              MaterialStateProperty.all(Colors.black)),
                       onPressed: () async {
                         SharedPreferences prefs =
                             await SharedPreferences.getInstance();

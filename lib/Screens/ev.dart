@@ -19,7 +19,7 @@ class Ev {
     try {
       final response = await http.get(Uri.parse(url));
       final responseData = jsonDecode(response.body);
-      // print("mapData: $responseData");
+      print("mapData: $responseData");
       if (response.statusCode == 200) {
         List x = responseData;
         for (int i = 0; i < x.length; i++) {

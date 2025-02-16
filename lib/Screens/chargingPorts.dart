@@ -107,7 +107,10 @@ class _ChargingPortsState extends State<ChargingPorts> {
         backgroundColor: Colors.greenAccent,
       ),
       body: availablePorts.isEmpty
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(
+              color: Colors.greenAccent,
+            ))
           : Center(
               child: Container(
                 padding: EdgeInsets.fromLTRB(0, 10, 0, 12),
@@ -296,6 +299,7 @@ class _ChargingPortsState extends State<ChargingPorts> {
         final responseData = jsonDecode(response.body);
         print(responseData);
         if (responseData['status'] == true) {
+          fetchAvailablePorts();
           final snackBar = SnackBar(
             elevation: 100,
             content: Text(responseData['message']),

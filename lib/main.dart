@@ -59,7 +59,10 @@ class _MyAppState extends State<MyApp> {
         useMaterial3: true,
       ),
       home: isLoggedIn == null
-          ? Center(child: CircularProgressIndicator())
+          ? Center(
+              child: CircularProgressIndicator(
+              color: Colors.greenAccent,
+            ))
           : isLoggedIn!
               ? Dashboard()
               : LoginPage(),

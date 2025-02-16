@@ -62,6 +62,8 @@ class _add_StationState extends State<add_Station> {
     return Scaffold(
       appBar: AppBar(
         title: Text('EV Station Form'),
+        centerTitle: true,
+        backgroundColor: Colors.greenAccent,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

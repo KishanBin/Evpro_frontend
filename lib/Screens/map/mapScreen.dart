@@ -21,7 +21,7 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   late MapController _mapController;
   loc.LocationData? currentLocation;
-  loc.Location _locationService = loc.Location();
+
   StreamSubscription<Position>? _positionStreamSubscription;
   LatLng? self;
   List<LatLng>? _route;

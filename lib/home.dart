@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:ev_pro/Screens/Editprofile.dart';
 import 'package:ev_pro/Screens/addStation.dart';
 import 'package:ev_pro/Screens/bookings/bookings.dart';
+import 'package:ev_pro/Screens/orders.dart';
 import 'package:ev_pro/Screens/station_finder.dart';
 import 'package:ev_pro/api.dart';
 import 'package:flutter/material.dart';
@@ -110,11 +111,10 @@ class _DashboardState extends State<Dashboard> {
           ? Center(
               child: Container(
                 decoration: BoxDecoration(
-                    // image: DecorationImage(
-                    //     image: AssetImage('assets/images/dashboard_bg.jpg'),
-                    //     fit: BoxFit.fill,
-                    //     opacity: 0.5)
-                    ),
+                    image: DecorationImage(
+                  image: AssetImage('assets/images/home_bg.avif'),
+                  fit: BoxFit.fill,
+                )),
                 alignment: Alignment.center,
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height,
@@ -122,22 +122,31 @@ class _DashboardState extends State<Dashboard> {
                   spacing: 20, // spacing between icons
                   runSpacing: 20, // spacing between rows
                   children: currentIconButtons!.map((iconButton) {
-                    return Column(
-                      children: [
-                        IconButton(
-                          iconSize: 100,
-                          color: Colors.greenAccent,
-                          icon: Icon(iconButton['icon']),
-                          onPressed: () async {
-                            await _fetchUserData();
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) => iconButton['onPressed']));
-                          },
-                        ),
-                        Text(iconButton['label']),
-                      ],
+                    return Container(
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(width: 0.5, color: Colors.black12),
+                          borderRadius: BorderRadius.circular(10)),
+                      child: Column(
+                        children: [
+                          IconButton(
+                            iconSize: 100,
+                            color: Colors.greenAccent,
+                            icon: Icon(iconButton['icon']),
+                            onPressed: () async {
+                              await _fetchUserData();
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => iconButton['onPressed']));
+                            },
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: Text(iconButton['label']),
+                          ),
+                        ],
+                      ),
                     );
                   }).toList(),
                 ),
@@ -174,6 +183,11 @@ class _DashboardState extends State<Dashboard> {
       'icon': Icons.ev_station_outlined,
       'label': 'Add Station',
       'onPressed': add_Station(),
+    },
+    {
+      'icon': Icons.receipt_long,
+      'label': 'Orders',
+      'onPressed': Orders(),
     },
     {
       'icon': Icons.person,

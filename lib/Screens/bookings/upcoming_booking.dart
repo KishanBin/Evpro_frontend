@@ -178,29 +178,29 @@ class _BookingListViewState extends State<BookingListView> {
                           ),
                           SizedBox(height: 10),
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    foregroundColor: Colors.white,
-                                    backgroundColor: Colors.green, // Text color
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  onPressed: () {
-                                    double lat =
-                                        double.parse(bookingList[index]['lat']);
-                                    double long = double.parse(
-                                        bookingList[index]['long']);
-                                    LatLng _destination = LatLng(lat, long);
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => MapScreen(
-                                                destination: _destination)));
-                                  },
-                                  child: Text("Direction")),
+                              // ElevatedButton(
+                              //     style: ElevatedButton.styleFrom(
+                              //       foregroundColor: Colors.white,
+                              //       backgroundColor: Colors.green, // Text color
+                              //       shape: RoundedRectangleBorder(
+                              //         borderRadius: BorderRadius.circular(8),
+                              //       ),
+                              //     ),
+                              //     onPressed: () {
+                              //       double lat =
+                              //           double.parse(bookingList[index]['lat']);
+                              //       double long = double.parse(
+                              //           bookingList[index]['long']);
+                              //       LatLng _destination = LatLng(lat, long);
+                              //       Navigator.push(
+                              //           context,
+                              //           MaterialPageRoute(
+                              //               builder: (context) => MapScreen(
+                              //                   destination: _destination)));
+                              //     },
+                              //     child: Text("Direction")),
                               ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                   foregroundColor: Colors.white,

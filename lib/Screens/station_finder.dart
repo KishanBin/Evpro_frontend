@@ -1,11 +1,16 @@
+import 'dart:async';
+import 'dart:convert';
 import 'package:ev_pro/Screens/timeSlot.dart';
 import 'package:ev_pro/Screens/ev.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart' as loc;
 import 'package:collection/collection.dart';
+import 'package:http/http.dart' as http;
 
 class station_finder extends StatefulWidget {
   const station_finder({super.key});
@@ -22,12 +27,13 @@ class _station_finderState extends State<station_finder> {
   String? _latitude;
   String? _longitude;
   LatLng? self;
+  List<LatLng>? _route;
+  LatLng? _destination;
 
   final PopupController _popupLayerController = PopupController();
 
   List<CustomMarker> stationMarker = [];
-
-  bool isRouteFetched = false; // Track if route is fetched
+  StreamSubscription<Position>? _positionStreamSubscription;
 
   @override
   void initState() {
@@ -39,9 +45,11 @@ class _station_finderState extends State<station_finder> {
   @override
   void dispose() {
     // Ensure to dispose resources and avoid memory leaks
+
     _popupLayerController.dispose();
     _mapController.dispose();
     super.dispose();
+    _positionStreamSubscription?.cancel();
   }
 
   Future<void> fetchCurrentLocation() async {
@@ -58,7 +66,7 @@ class _station_finderState extends State<station_finder> {
         var myLocation = Marker(
           point: self!,
           child: const Icon(
-            Icons.location_pin,
+            Icons.navigation_sharp,
             color: Colors.blue,
             size: 40,
           ),
@@ -69,6 +77,7 @@ class _station_finderState extends State<station_finder> {
         stationMarker.add(customMarker);
 
         var _stations = await Ev().getStation(_latitude, _longitude);
+
         stationMarker.addAll(_stations); // here we add the list of markers
 
         if (mounted) {
@@ -169,18 +178,84 @@ class _station_finderState extends State<station_finder> {
                             ),
                           ),
                           if (customMarker.name != 'Your Location')
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => station_booking(
-                                      stationId: customMarker.id!,
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                InkWell(
+                                  onTap: () {
+                                    _destination = customMarker.marker.point;
+
+                                    _positionStreamSubscription =
+                                        Geolocator.getPositionStream(
+                                      locationSettings: LocationSettings(
+                                        accuracy: LocationAccuracy.high,
+                                        distanceFilter:
+                                            0, // Update whenever there's any movement
+                                      ),
+                                    ).listen((Position position) {
+                                      // Check if the widget is still mounted before updating the state
+                                      if (mounted) {
+                                        setState(() {
+                                          self = LatLng(position.latitude,
+                                              position.longitude);
+                                        });
+                                        _route = [];
+                                        // Fetch the route only if the widget is still mounted
+                                        fetchRoute();
+                                      }
+                                    });
+                                  },
+                                  child: Container(
+                                    height: 30,
+                                    width: 70,
+                                    decoration: BoxDecoration(
+                                        color: Colors.black,
+                                        border: Border.all(width: 1),
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.navigation_outlined,
+                                          color: Colors.white,
+                                        ),
+                                        Text(
+                                          'Route',
+                                          style: TextStyle(color: Colors.white),
+                                        )
+                                      ],
                                     ),
                                   ),
-                                );
-                              },
-                              child: Text('Book'),
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => station_booking(
+                                          stationId: customMarker.id!,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: Container(
+                                      alignment: Alignment.center,
+                                      height: 30,
+                                      width: 70,
+                                      decoration: BoxDecoration(
+                                          color: Colors.black,
+                                          border: Border.all(width: 1),
+                                          borderRadius:
+                                              BorderRadius.circular(10)),
+                                      child: Text(
+                                        'Book',
+                                        style: TextStyle(color: Colors.white),
+                                      )),
+                                ),
+                              ],
                             ),
                         ],
                       ),
@@ -193,7 +268,59 @@ class _station_finderState extends State<station_finder> {
             ),
           ),
         ),
+        if (self != null && _route != null)
+          PolylineLayer(
+            polylines: [
+              Polyline(
+                points: _route!,
+                strokeWidth: 4.0,
+                color: Colors.blue,
+              ),
+            ],
+          ),
       ],
     );
+  }
+
+  Future<void> fetchRoute() async {
+    print("hari bol");
+
+    // Ensure we have both self and destination, and widget is still mounted
+    if (self == null || _destination == null) return;
+
+    final url = Uri.parse('http://router.project-osrm.org/route/v1/driving/'
+        '${self!.longitude},${self!.latitude};'
+        '${_destination!.longitude},${_destination!.latitude}?overview=full&geometries=polyline');
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print(data);
+
+        final geometry = data['routes'][0]['geometry'];
+        _decodePolyline(geometry);
+      } else {
+        // Handle HTTP errors (e.g., 400, 500 status codes)
+        print('Error: ${response.statusCode}');
+      }
+    } catch (e) {
+      // Handle any error that might occur during the HTTP request
+      print('Error fetching route: $e');
+    }
+  }
+
+  void _decodePolyline(String encodedPolyline) {
+    PolylinePoints polylinePoints = PolylinePoints();
+    List<PointLatLng> decodedPoints =
+        polylinePoints.decodePolyline(encodedPolyline);
+
+    setState(() {
+      _route = decodedPoints
+          .map((point) => LatLng(point.latitude, point.longitude))
+          .toList();
+      print("hari bol 3");
+    });
   }
 }
