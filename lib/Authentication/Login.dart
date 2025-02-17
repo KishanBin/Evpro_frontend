@@ -146,7 +146,10 @@ class _LoginPageState extends State<LoginPage> {
 
                             final snackBar = SnackBar(
                               elevation: 100,
-                              content: Text(responseData['message']),
+                              content: Text(
+                                responseData['message'],
+                                style: TextStyle(color: Colors.black),
+                              ),
                               backgroundColor: Colors.greenAccent,
                             );
                             ScaffoldMessenger.of(context)

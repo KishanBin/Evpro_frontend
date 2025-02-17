@@ -20,7 +20,7 @@ class _OrdersState extends State<Orders> {
 
   fetchOrders(DateTime date) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? userId = prefs.getString('user_id');
+    String? userId = prefs.getString('userId');
 
     final String url = "${Api().user}get_orders?user_id=${userId}&date=${date}";
 
@@ -37,7 +37,7 @@ class _OrdersState extends State<Orders> {
         print(orders);
       }
     } catch (e) {
-      print("OTP Verification Error: $e");
+      print("Ordes Error: $e");
     }
   }
 

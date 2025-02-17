@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:ev_pro/Screens/Editprofile.dart';
-import 'package:ev_pro/Screens/addStation.dart';
+import 'package:ev_pro/Screens/owner/addStation.dart';
 import 'package:ev_pro/Screens/bookings/bookings.dart';
-import 'package:ev_pro/Screens/orders.dart';
+import 'package:ev_pro/Screens/owner/maintain.dart';
+import 'package:ev_pro/Screens/owner/orders.dart';
 import 'package:ev_pro/Screens/station_finder.dart';
 import 'package:ev_pro/api.dart';
 import 'package:flutter/material.dart';
@@ -112,7 +113,7 @@ class _DashboardState extends State<Dashboard> {
               child: Container(
                 decoration: BoxDecoration(
                     image: DecorationImage(
-                  image: AssetImage('assets/images/home_bg.avif'),
+                  image: AssetImage('assets/images/home_bg.jpg'),
                   fit: BoxFit.fill,
                 )),
                 alignment: Alignment.center,
@@ -188,6 +189,11 @@ class _DashboardState extends State<Dashboard> {
       'icon': Icons.receipt_long,
       'label': 'Orders',
       'onPressed': Orders(),
+    },
+    {
+      'icon': Icons.settings,
+      'label': 'Maintenance',
+      'onPressed': Maintenance(),
     },
     {
       'icon': Icons.person,
