@@ -11,8 +11,7 @@ import 'package:http/http.dart' as http;
 
 // ignore: must_be_immutable
 class MapScreen extends StatefulWidget {
-  LatLng destination;
-  MapScreen({super.key, required this.destination});
+  MapScreen({super.key});
 
   @override
   State<MapScreen> createState() => _MapScreenState();
@@ -20,11 +19,14 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   late MapController _mapController;
+  LatLng destination = LatLng(19.206363, 72.838200);
   loc.LocationData? currentLocation;
 
   StreamSubscription<Position>? _positionStreamSubscription;
   LatLng? self;
   List<LatLng>? _route;
+  double? heading;
+
   @override
   void initState() {
     super.initState();
@@ -41,6 +43,7 @@ class _MapScreenState extends State<MapScreen> {
     ).listen((Position position) {
       setState(() {
         self = LatLng(position.latitude, position.longitude);
+        heading = position.heading; // Get the heading (device direction)
       });
 
       fetchRoute();
@@ -81,13 +84,18 @@ class _MapScreenState extends State<MapScreen> {
                   MarkerLayer(markers: [
                     Marker(
                         point: self!,
-                        child: Icon(
-                          Icons.location_on,
-                          color: Colors.blue,
-                          size: 30,
+                        child: Transform.rotate(
+                          angle:
+                              (heading ?? 0) * (3.14159 / 180), // Rotate marker
+                          child: Icon(
+                            Icons.navigation,
+                            color: Colors.blue,
+                            size: 30,
+                          ),
                         )),
                     Marker(
-                        point: widget.destination,
+                        point: destination,
+                        rotate: true,
                         child: Icon(
                           Icons.location_on,
                           color: Colors.red,
@@ -109,18 +117,15 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> fetchRoute() async {
-    print("hari bol");
-    if (self == null || widget.destination == null) return;
+    if (self == null || destination == null) return;
 
     final url = Uri.parse('http://router.project-osrm.org/route/v1/driving/'
         '${self!.longitude},${self!.latitude};'
-        '${widget.destination.longitude},${widget.destination.latitude}?overview=full&geometries=polyline');
+        '${destination.longitude},${destination.latitude}?overview=full&geometries=polyline');
 
     final response = await http.get(url);
-    // print("statusCode: ${response.statusCode}");
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      print(data);
       final geometry = data['routes'][0]['geometry'];
       _decodePolyline(geometry);
     }
@@ -135,7 +140,6 @@ class _MapScreenState extends State<MapScreen> {
       _route = decodedPoints
           .map((point) => LatLng(point.latitude, point.longitude))
           .toList();
-      print("hari bol 3");
     });
   }
 }

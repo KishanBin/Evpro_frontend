@@ -29,6 +29,8 @@ class _station_finderState extends State<station_finder> {
   LatLng? self;
   List<LatLng>? _route;
   LatLng? _destination;
+  double? heading;
+  bool _isRoute = false;
 
   final PopupController _popupLayerController = PopupController();
 
@@ -59,22 +61,22 @@ class _station_finderState extends State<station_finder> {
         self = LatLng(currentLocation!.latitude!, currentLocation!.longitude!);
         _latitude = currentLocation!.latitude!.toString();
         _longitude = currentLocation!.longitude!.toString();
-
+        setState(() {});
         // Check if there's an existing marker and remove it before adding a new one
-        stationMarker.removeWhere((marker) => marker.name == 'Your Location');
+        // stationMarker.removeWhere((marker) => marker.name == 'Your Location');
 
-        var myLocation = Marker(
-          point: self!,
-          child: const Icon(
-            Icons.navigation_sharp,
-            color: Colors.blue,
-            size: 40,
-          ),
-        );
+        // var myLocation = Marker(
+        //   point: self!,
+        //   child: const Icon(
+        //     Icons.navigation_sharp,
+        //     color: Colors.blue,
+        //     size: 40,
+        //   ),
+        // );
 
-        var customMarker =
-            CustomMarker(marker: myLocation, name: 'Your Location');
-        stationMarker.add(customMarker);
+        // var customMarker =
+        //     CustomMarker(marker: myLocation, name: 'Your Location');
+        // stationMarker.add(customMarker);
 
         var _stations = await Ev().getStation(_latitude, _longitude);
 
@@ -99,7 +101,13 @@ class _station_finderState extends State<station_finder> {
         centerTitle: true,
         backgroundColor: Colors.greenAccent,
       ),
-      body: _map(context, stationMarker),
+      body: self == null
+          ? Center(
+              child: CircularProgressIndicator(
+                color: Colors.greenAccent,
+              ),
+            )
+          : _map(context, stationMarker),
     );
   }
 
@@ -116,6 +124,24 @@ class _station_finderState extends State<station_finder> {
           urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
           userAgentPackageName: 'dev.fleaflet.flutter_map.example',
         ),
+        MarkerLayer(markers: [
+          Marker(
+            point: self!,
+            child: _isRoute
+                ? Transform.rotate(
+                    angle: (heading ?? 0) * (3.14159 / 180), // Rotate marker
+                    child: Icon(
+                      Icons.navigation,
+                      size: 40,
+                    ),
+                  )
+                : Icon(
+                    Icons.location_pin,
+                    color: Colors.blue,
+                    size: 40,
+                  ),
+          )
+        ]),
         PopupMarkerLayer(
           options: PopupMarkerLayerOptions(
             markers: stationMarker
@@ -183,6 +209,7 @@ class _station_finderState extends State<station_finder> {
                               children: [
                                 InkWell(
                                   onTap: () {
+                                    _isRoute = true;
                                     _destination = customMarker.marker.point;
 
                                     _positionStreamSubscription =
@@ -198,6 +225,8 @@ class _station_finderState extends State<station_finder> {
                                         setState(() {
                                           self = LatLng(position.latitude,
                                               position.longitude);
+                                          heading = position
+                                              .heading; // Get the heading (device direction)
                                         });
                                         _route = [];
                                         // Fetch the route only if the widget is still mounted
